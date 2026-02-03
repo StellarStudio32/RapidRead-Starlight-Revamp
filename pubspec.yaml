@@ -1,0 +1,34 @@
+name: rapid_read_v2
+description: A speed reading application with AI-powered study tools.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any # Required for code generation by flutter_localizations
+  provider: ^6.1.2
+  go_router: ^13.2.0
+  isar: ^3.1.0+1
+  isar_flutter_libs: ^3.1.0+1
+  path_provider: ^2.1.5
+  file_picker: ^10.3.10
+  syncfusion_flutter_pdf: ^32.1.25
+  docx_to_text: ^1.0.1
+  get_it: ^9.2.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+  build_runner: ^2.4.8
+  isar_generator: ^3.1.0+1
+
+flutter:
+  uses-material-design: true
+  generate: true

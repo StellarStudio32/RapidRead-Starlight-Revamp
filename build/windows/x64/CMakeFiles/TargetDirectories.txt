@@ -1,0 +1,13 @@
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/CMakeFiles/INSTALL.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/CMakeFiles/ALL_BUILD.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/CMakeFiles/ZERO_CHECK.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/flutter/CMakeFiles/flutter_wrapper_plugin.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/flutter/CMakeFiles/flutter_wrapper_app.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/flutter/CMakeFiles/flutter_assemble.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/flutter/CMakeFiles/INSTALL.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/runner/CMakeFiles/rapid_read_v2.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/runner/CMakeFiles/INSTALL.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/runner/CMakeFiles/ALL_BUILD.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/plugins/isar_flutter_libs/CMakeFiles/isar_flutter_libs_plugin.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/plugins/isar_flutter_libs/CMakeFiles/INSTALL.dir
+C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/plugins/isar_flutter_libs/CMakeFiles/ALL_BUILD.dir

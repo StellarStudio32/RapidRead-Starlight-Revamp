@@ -1,0 +1,11 @@
+{
+    "@@locale": "es",
+    "appTitle": "RapidRead V2",
+    "homeScreenTitle": "Inicio",
+    "helloWorld": "¡Hola Mundo!",
+    "libraryScreenTitle": "Biblioteca",
+    "importDocumentButton": "Importar Documento",
+    "noDocumentsFound": "No se encontraron documents. Importa un archivo para comenzar.",
+    "fileImportSuccess": "¡Archivo importado con éxito!",
+    "fileImportFailed": "Falló la importación del archivo."
+}

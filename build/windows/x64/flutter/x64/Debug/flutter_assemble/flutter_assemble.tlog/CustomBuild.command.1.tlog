@@ -1,0 +1,28 @@
+^C:\USERS\AIDEN\DESKTOP\RAPIDREAD STARLIGHT REVAMP\BUILD\WINDOWS\X64\CMAKEFILES\CB8FD428D509B3A62F8E142E1E4252DC\FLUTTER_WINDOWS.DLL.RULE
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" -E env FLUTTER_ROOT=C:\flutter "PROJECT_DIR=C:\Users\aiden\Desktop\RapidRead Starlight Revamp" FLUTTER_ROOT=C:\flutter "FLUTTER_EPHEMERAL_DIR=C:\Users\aiden\Desktop\RapidRead Starlight Revamp\windows\flutter\ephemeral" "PROJECT_DIR=C:\Users\aiden\Desktop\RapidRead Starlight Revamp" "FLUTTER_TARGET=C:\Users\aiden\Desktop\RapidRead Starlight Revamp\lib\main.dart" DART_DEFINES=RkxVVFRFUl9WRVJTSU9OPTMuMzUuMw==,RkxVVFRFUl9DSEFOTkVMPXN0YWJsZQ==,RkxVVFRFUl9HSVRfVVJMPWh0dHBzOi8vZ2l0aHViLmNvbS9mbHV0dGVyL2ZsdXR0ZXIuZ2l0,RkxVVFRFUl9GUkFNRVdPUktfUkVWSVNJT049YTQwMmQ5YTQzNw==,RkxVVFRFUl9FTkdJTkVfUkVWSVNJT049ZGRmNDdkZDNmZg==,RkxVVFRFUl9EQVJUX1ZFUlNJT049My45LjI= DART_OBFUSCATION=false TRACK_WIDGET_CREATION=true TREE_SHAKE_ICONS=false "PACKAGE_CONFIG=C:\Users\aiden\Desktop\RapidRead Starlight Revamp\.dart_tool\package_config.json" C:/flutter/packages/flutter_tools/bin/tool_backend.bat windows-x64 Debug
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\AIDEN\DESKTOP\RAPIDREAD STARLIGHT REVAMP\BUILD\WINDOWS\X64\CMAKEFILES\4F2503BE46EC8406CAB94C2ECDFFEF59\FLUTTER_ASSEMBLE.RULE
+setlocal
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
+^C:\USERS\AIDEN\DESKTOP\RAPIDREAD STARLIGHT REVAMP\WINDOWS\FLUTTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe" "-SC:/Users/aiden/Desktop/RapidRead Starlight Revamp/windows" "-BC:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64" --check-stamp-file "C:/Users/aiden/Desktop/RapidRead Starlight Revamp/build/windows/x64/flutter/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
