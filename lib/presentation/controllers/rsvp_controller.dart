@@ -6,6 +6,7 @@ class RsvpController extends ChangeNotifier {
   RsvpController({
     required String text,
     required TickerProvider vsync,
+    required int documentId,
     int wpm = 300,
     int initialIndex = 0,
   })  : _vsync = vsync,
@@ -14,7 +15,12 @@ class RsvpController extends ChangeNotifier {
     if (initialIndex >= 0 && initialIndex < _words.length) {
       currentIndex = initialIndex;
     }
-    _session = ReadingSession()..words = _words;
+    _session = ReadingSession()
+      ..documentId = documentId
+      ..currentWordIndex = currentIndex
+      ..totalWords = _words.length
+      ..isCompleted = false
+      ..words = _words;
     _ticker = _vsync.createTicker(_onTick);
   }
 
@@ -28,6 +34,8 @@ class RsvpController extends ChangeNotifier {
 
   int currentIndex = 0;
   bool isFinished = false;
+
+  int get totalWords => _words.length;
 
   String get currentWord {
     if (_words.isEmpty || currentIndex < 0 || currentIndex >= _words.length) {
@@ -80,6 +88,7 @@ class RsvpController extends ChangeNotifier {
 
   void skip(int wordCount) {
     currentIndex = (currentIndex + wordCount).clamp(0, _words.length - 1);
+    _session.currentWordIndex = currentIndex;
     notifyListeners();
   }
 
@@ -93,6 +102,7 @@ class RsvpController extends ChangeNotifier {
     if (elapsed.inMilliseconds - _elapsed.inMilliseconds >= delay) {
       if (currentIndex < _words.length - 1) {
         currentIndex++;
+        _session.currentWordIndex = currentIndex;
         _elapsed = elapsed;
         notifyListeners();
       } else {
@@ -106,6 +116,8 @@ class RsvpController extends ChangeNotifier {
   void _endSession() {
     _ticker.stop();
     _isPlaying = false;
+    _session.currentWordIndex = currentIndex;
+    _session.isCompleted = true;
     _session.endTimestamp = DateTime.now();
     final totalDuration = _session.endTimestamp!.difference(_session.startTimestamp);
     _session.totalActiveMilliseconds = (totalDuration - _totalPausedDuration).inMilliseconds;

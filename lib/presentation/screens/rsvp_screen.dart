@@ -1,16 +1,18 @@
-import 'package:go_router/go_router.dart';
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rapid_read_v2/data/services/service_locator.dart';
-import 'package:rapid_read_v2/domain/entities/source_document.dart';
-import 'package:rapid_read_v2/presentation/controllers/rsvp_controller.dart';
+import 'package:go_router/go_router.dart';
 import 'package:isar/isar.dart';
+import 'package:rapid_read_v2/data/services/service_locator.dart';
+import 'package:rapid_read_v2/presentation/controllers/rsvp_controller.dart';
 
 class RsvpScreen extends StatefulWidget {
   final String text;
   final int wpm;
   final int docId;
   final int initialIndex;
+  final int? sessionId;
 
   const RsvpScreen({
     super.key,
@@ -18,6 +20,7 @@ class RsvpScreen extends StatefulWidget {
     this.wpm = 300,
     required this.docId,
     required this.initialIndex,
+    this.sessionId,
   });
 
   @override
@@ -28,6 +31,9 @@ class _RsvpScreenState extends State<RsvpScreen>
     with SingleTickerProviderStateMixin {
   late final RsvpController _controller;
   late final AppLifecycleListener _listener;
+  Timer? _autoSaveTimer;
+  bool _wasPlaying = false;
+  bool _didSaveCompletion = false;
 
   @override
   void initState() {
@@ -36,11 +42,17 @@ class _RsvpScreenState extends State<RsvpScreen>
     _controller = RsvpController(
       text: widget.text,
       vsync: this,
+      documentId: widget.docId,
       wpm: widget.wpm,
       initialIndex: widget.initialIndex,
     );
+    if (widget.sessionId != null) {
+      _controller.readingSession.id = widget.sessionId!;
+    }
     _controller.addListener(_onControllerUpdate);
     _controller.start();
+    _startAutoSaveTimer();
+    _persistSession();
 
     _listener = AppLifecycleListener(
       onStateChange: _onStateChanged,
@@ -50,27 +62,34 @@ class _RsvpScreenState extends State<RsvpScreen>
   void _onStateChanged(AppLifecycleState state) {
     if (state == AppLifecycleState.paused ||
         state == AppLifecycleState.detached) {
-      _savePosition();
+      _persistSession();
     }
   }
 
-  void _savePosition() async {
+  Future<void> _persistSession() async {
     final isar = getIt<Isar>();
-    final doc = await isar.sourceDocuments.get(widget.docId);
+    final session = _controller.readingSession;
+    session
+      ..documentId = widget.docId
+      ..currentWordIndex = _controller.currentIndex
+      ..totalWords = _controller.totalWords
+      ..isCompleted = _controller.isFinished;
 
-    if (doc != null) {
-      if (_controller.isFinished) {
-        doc.lastPosition = 0;
-      } else {
-        doc.lastPosition = _controller.currentIndex;
-      }
-      await isar.writeTxn(() async {
-        await isar.sourceDocuments.put(doc);
-      });
-    }
+    await isar.writeTxn(() async {
+      final sessionId = await isar.readingSessions.put(session);
+      session.id = sessionId;
+    });
   }
 
   void _onControllerUpdate() {
+    if (_wasPlaying && !_controller.isPlaying) {
+      _persistSession();
+    }
+    _wasPlaying = _controller.isPlaying;
+    if (_controller.isFinished && !_didSaveCompletion) {
+      _didSaveCompletion = true;
+      _persistSession();
+    }
     // This is to rebuild the widget when the controller notifies listeners
     if (mounted) {
       setState(() {});
@@ -81,9 +100,27 @@ class _RsvpScreenState extends State<RsvpScreen>
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     _controller.removeListener(_onControllerUpdate);
+    _autoSaveTimer?.cancel();
+    _persistSession();
     _controller.dispose();
     _listener.dispose();
     super.dispose();
+  }
+
+  void _startAutoSaveTimer() {
+    _autoSaveTimer?.cancel();
+    _autoSaveTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      if (_controller.isPlaying) {
+        _persistSession();
+      }
+    });
+  }
+
+  double _progressValue() {
+    if (_controller.totalWords == 0) {
+      return 0.0;
+    }
+    return (_controller.currentIndex / _controller.totalWords).clamp(0.0, 1.0);
   }
 
 
@@ -99,7 +136,7 @@ class _RsvpScreenState extends State<RsvpScreen>
       onPopInvoked: (didPop) async {
         if (didPop) return;
 
-        _savePosition();
+        await _persistSession();
 
         if (!mounted) return;
         context.pop(_controller.readingSession);
@@ -154,6 +191,23 @@ class _RsvpScreenState extends State<RsvpScreen>
                   onChanged: (double value) {
                     _controller.updateWpm(value.toInt());
                   },
+                ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  child: TweenAnimationBuilder<double>(
+                    tween: Tween<double>(
+                      begin: 0,
+                      end: _progressValue(),
+                    ),
+                    duration: const Duration(milliseconds: 200),
+                    builder: (context, value, child) {
+                      return LinearProgressIndicator(
+                        value: value,
+                        backgroundColor: Colors.white24,
+                        valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+                      );
+                    },
+                  ),
                 ),
               ],
             ),

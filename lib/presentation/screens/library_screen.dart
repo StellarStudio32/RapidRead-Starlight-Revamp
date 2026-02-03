@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rapid_read_v2/data/services/import_service.dart';
 import 'package:rapid_read_v2/data/services/service_locator.dart';
+import 'package:rapid_read_v2/domain/entities/reading_session.dart';
 import 'package:rapid_read_v2/domain/entities/source_document.dart';
 import 'package:provider/provider.dart';
 import 'package:rapid_read_v2/l10n/generated/app_localizations.dart';
@@ -25,6 +26,70 @@ class _LibraryScreenState extends State<LibraryScreen> {
   void initState() {
     super.initState();
     documentsStream = isar.sourceDocuments.where().watch(fireImmediately: true);
+  }
+
+  Future<void> _openDocument(SourceDocument doc) async {
+    final latestSession = await isar.readingSessions
+        .filter()
+        .documentIdEqualTo(doc.id)
+        .sortByStartTimestampDesc()
+        .findFirst();
+
+    int initialIndex = 0;
+    int? sessionId;
+
+    if (latestSession != null) {
+      if (latestSession.isCompleted) {
+        if (!mounted) return;
+        final shouldRestart = await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text("You've finished this. Start over?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('No'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text('Yes'),
+              ),
+            ],
+          ),
+        );
+        if (shouldRestart != true) {
+          return;
+        }
+      } else {
+        initialIndex = latestSession.currentWordIndex;
+        sessionId = latestSession.id;
+        final totalWords = latestSession.totalWords;
+        final percent = totalWords > 0
+            ? ((initialIndex / totalWords) * 100).clamp(0, 100)
+            : 0.0;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Resuming from ${percent.toStringAsFixed(0)}% complete',
+              ),
+            ),
+          );
+        }
+      }
+    }
+
+    if (!mounted) return;
+    context.go(
+      '/rsvp',
+      extra: {
+        'text': doc.content,
+        'wpm': '300',
+        'docId': doc.id.toString(),
+        'initialIndex': initialIndex.toString(),
+        if (sessionId != null) 'sessionId': sessionId.toString(),
+      },
+    );
   }
 
   void _onFileProcessed(bool success) {
@@ -86,17 +151,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
               return ListTile(
                 title: Text(doc.title),
                 subtitle: Text('Added on ${DateFormat.yMMMd().format(doc.dateAdded.toLocal())}'),
-                onTap: () {
-                  context.go(
-                    '/rsvp',
-                    extra: {
-                      'text': doc.content,
-                      'wpm': '300',
-                      'docId': doc.id.toString(),
-                      'initialIndex': doc.lastPosition.toString(),
-                    },
-                  );
-                },
+                onTap: () => _openDocument(doc),
               );
             },
           );
