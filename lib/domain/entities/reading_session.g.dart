@@ -17,28 +17,62 @@ const ReadingSessionSchema = CollectionSchema(
   name: r'ReadingSession',
   id: -2237521196892654814,
   properties: {
-    r'endTimestamp': PropertySchema(
+    r'currentWordIndex': PropertySchema(
       id: 0,
+      name: r'currentWordIndex',
+      type: IsarType.long,
+    ),
+    r'documentId': PropertySchema(
+      id: 1,
+      name: r'documentId',
+      type: IsarType.long,
+    ),
+    r'endTimestamp': PropertySchema(
+      id: 2,
       name: r'endTimestamp',
       type: IsarType.dateTime,
     ),
+    r'isCompleted': PropertySchema(
+      id: 3,
+      name: r'isCompleted',
+      type: IsarType.bool,
+    ),
     r'startTimestamp': PropertySchema(
-      id: 1,
+      id: 4,
       name: r'startTimestamp',
       type: IsarType.dateTime,
     ),
     r'totalActiveMilliseconds': PropertySchema(
-      id: 2,
+      id: 5,
       name: r'totalActiveMilliseconds',
       type: IsarType.long,
-    )
+    ),
+    r'totalWords': PropertySchema(
+      id: 6,
+      name: r'totalWords',
+      type: IsarType.long,
+    ),
   },
   estimateSize: _readingSessionEstimateSize,
   serialize: _readingSessionSerialize,
   deserialize: _readingSessionDeserialize,
   deserializeProp: _readingSessionDeserializeProp,
   idName: r'id',
-  indexes: {},
+  indexes: {
+    r'documentId': IndexSchema(
+      id: 3855767011488649251,
+      name: r'documentId',
+      unique: false,
+      replace: false,
+      properties: [
+        IndexPropertySchema(
+          name: r'documentId',
+          type: IndexType.hash,
+          caseSensitive: false,
+        )
+      ],
+    )
+  },
   links: {},
   embeddedSchemas: {},
   getId: _readingSessionGetId,
@@ -62,9 +96,13 @@ void _readingSessionSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDateTime(offsets[0], object.endTimestamp);
-  writer.writeDateTime(offsets[1], object.startTimestamp);
-  writer.writeLong(offsets[2], object.totalActiveMilliseconds);
+  writer.writeLong(offsets[0], object.currentWordIndex);
+  writer.writeLong(offsets[1], object.documentId);
+  writer.writeDateTime(offsets[2], object.endTimestamp);
+  writer.writeBool(offsets[3], object.isCompleted);
+  writer.writeDateTime(offsets[4], object.startTimestamp);
+  writer.writeLong(offsets[5], object.totalActiveMilliseconds);
+  writer.writeLong(offsets[6], object.totalWords);
 }
 
 ReadingSession _readingSessionDeserialize(
@@ -74,10 +112,14 @@ ReadingSession _readingSessionDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = ReadingSession();
-  object.endTimestamp = reader.readDateTimeOrNull(offsets[0]);
+  object.currentWordIndex = reader.readLong(offsets[0]);
+  object.documentId = reader.readLong(offsets[1]);
+  object.endTimestamp = reader.readDateTimeOrNull(offsets[2]);
   object.id = id;
-  object.startTimestamp = reader.readDateTime(offsets[1]);
-  object.totalActiveMilliseconds = reader.readLong(offsets[2]);
+  object.isCompleted = reader.readBool(offsets[3]);
+  object.startTimestamp = reader.readDateTime(offsets[4]);
+  object.totalActiveMilliseconds = reader.readLong(offsets[5]);
+  object.totalWords = reader.readLong(offsets[6]);
   return object;
 }
 
@@ -89,10 +131,18 @@ P _readingSessionDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDateTimeOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 2:
+      return (reader.readDateTimeOrNull(offset)) as P;
+    case 3:
+      return (reader.readBool(offset)) as P;
+    case 4:
+      return (reader.readDateTime(offset)) as P;
+    case 5:
+      return (reader.readLong(offset)) as P;
+    case 6:
       return (reader.readLong(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -189,6 +239,51 @@ extension ReadingSessionQueryWhere
         upper: upperId,
         includeUpper: includeUpper,
       ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterWhereClause>
+      documentIdEqualTo(int documentId) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addWhereClause(IndexWhereClause.equalTo(
+        indexName: r'documentId',
+        value: [documentId],
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterWhereClause>
+      documentIdNotEqualTo(int documentId) {
+    return QueryBuilder.apply(this, (query) {
+      if (query.whereSort == Sort.asc) {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'documentId',
+              lower: [],
+              upper: [documentId],
+              includeUpper: false,
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'documentId',
+              lower: [documentId],
+              includeLower: false,
+              upper: [],
+            ));
+      } else {
+        return query
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'documentId',
+              lower: [documentId],
+              includeLower: false,
+              upper: [],
+            ))
+            .addWhereClause(IndexWhereClause.between(
+              indexName: r'documentId',
+              lower: [],
+              upper: [documentId],
+              includeUpper: false,
+            ));
+      }
     });
   }
 }
@@ -325,11 +420,189 @@ extension ReadingSessionQueryFilter
   }
 
   QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      currentWordIndexEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'currentWordIndex',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      currentWordIndexGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'currentWordIndex',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      currentWordIndexLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'currentWordIndex',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      currentWordIndexBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'currentWordIndex',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      documentIdEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'documentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      documentIdGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'documentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      documentIdLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'documentId',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      documentIdBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'documentId',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      isCompletedEqualTo(bool value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'isCompleted',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
       startTimestampEqualTo(DateTime value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'startTimestamp',
         value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      totalWordsEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'totalWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      totalWordsGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'totalWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      totalWordsLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'totalWords',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterFilterCondition>
+      totalWordsBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'totalWords',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -446,6 +719,34 @@ extension ReadingSessionQueryLinks
 extension ReadingSessionQuerySortBy
     on QueryBuilder<ReadingSession, ReadingSession, QSortBy> {
   QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      sortByCurrentWordIndex() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currentWordIndex', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      sortByCurrentWordIndexDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currentWordIndex', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      sortByDocumentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'documentId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      sortByDocumentIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'documentId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
       sortByEndTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endTimestamp', Sort.asc);
@@ -456,6 +757,20 @@ extension ReadingSessionQuerySortBy
       sortByEndTimestampDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endTimestamp', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      sortByIsCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      sortByIsCompletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompleted', Sort.desc);
     });
   }
 
@@ -486,10 +801,52 @@ extension ReadingSessionQuerySortBy
       return query.addSortBy(r'totalActiveMilliseconds', Sort.desc);
     });
   }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      sortByTotalWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWords', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      sortByTotalWordsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWords', Sort.desc);
+    });
+  }
 }
 
 extension ReadingSessionQuerySortThenBy
     on QueryBuilder<ReadingSession, ReadingSession, QSortThenBy> {
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      thenByCurrentWordIndex() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currentWordIndex', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      thenByCurrentWordIndexDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'currentWordIndex', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      thenByDocumentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'documentId', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      thenByDocumentIdDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'documentId', Sort.desc);
+    });
+  }
+
   QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
       thenByEndTimestamp() {
     return QueryBuilder.apply(this, (query) {
@@ -501,6 +858,20 @@ extension ReadingSessionQuerySortThenBy
       thenByEndTimestampDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'endTimestamp', Sort.desc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      thenByIsCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompleted', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      thenByIsCompletedDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'isCompleted', Sort.desc);
     });
   }
 
@@ -543,14 +914,49 @@ extension ReadingSessionQuerySortThenBy
       return query.addSortBy(r'totalActiveMilliseconds', Sort.desc);
     });
   }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      thenByTotalWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWords', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QAfterSortBy>
+      thenByTotalWordsDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'totalWords', Sort.desc);
+    });
+  }
 }
 
 extension ReadingSessionQueryWhereDistinct
     on QueryBuilder<ReadingSession, ReadingSession, QDistinct> {
   QueryBuilder<ReadingSession, ReadingSession, QDistinct>
+      distinctByCurrentWordIndex() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'currentWordIndex');
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QDistinct>
+      distinctByDocumentId() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'documentId');
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QDistinct>
       distinctByEndTimestamp() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'endTimestamp');
+    });
+  }
+
+  QueryBuilder<ReadingSession, ReadingSession, QDistinct>
+      distinctByIsCompleted() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'isCompleted');
     });
   }
 
@@ -567,6 +973,13 @@ extension ReadingSessionQueryWhereDistinct
       return query.addDistinctBy(r'totalActiveMilliseconds');
     });
   }
+
+  QueryBuilder<ReadingSession, ReadingSession, QDistinct>
+      distinctByTotalWords() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'totalWords');
+    });
+  }
 }
 
 extension ReadingSessionQueryProperty
@@ -577,10 +990,29 @@ extension ReadingSessionQueryProperty
     });
   }
 
+  QueryBuilder<ReadingSession, int, QQueryOperations>
+      currentWordIndexProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'currentWordIndex');
+    });
+  }
+
+  QueryBuilder<ReadingSession, int, QQueryOperations> documentIdProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'documentId');
+    });
+  }
+
   QueryBuilder<ReadingSession, DateTime?, QQueryOperations>
       endTimestampProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'endTimestamp');
+    });
+  }
+
+  QueryBuilder<ReadingSession, bool, QQueryOperations> isCompletedProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'isCompleted');
     });
   }
 
@@ -595,6 +1027,12 @@ extension ReadingSessionQueryProperty
       totalActiveMillisecondsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'totalActiveMilliseconds');
+    });
+  }
+
+  QueryBuilder<ReadingSession, int, QQueryOperations> totalWordsProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'totalWords');
     });
   }
 }

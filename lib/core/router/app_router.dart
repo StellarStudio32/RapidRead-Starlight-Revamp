@@ -26,6 +26,7 @@ class AppRouter {
                 wpm: int.tryParse(extra['wpm'] ?? '300') ?? 300,
                 docId: int.tryParse(extra['docId'] ?? '0') ?? 0,
                 initialIndex: int.tryParse(extra['initialIndex'] ?? '0') ?? 0,
+                sessionId: int.tryParse(extra['sessionId'] ?? ''),
               );
             },
           ),
